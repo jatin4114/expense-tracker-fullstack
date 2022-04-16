@@ -1,0 +1,31 @@
+.topbar {
+  height: var(--topbar-height);
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.topbar-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 20px;
+}
+
+@media (max-width: 900px) {
+  .menu-btn {
+    display: block;
+  }
+}

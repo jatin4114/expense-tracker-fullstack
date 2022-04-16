@@ -1,0 +1,20 @@
+.empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--color-text-light);
+}
+
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.empty-state h3 {
+  margin: 0 0 6px 0;
+  color: var(--color-text);
+}
+
+.empty-state p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+}

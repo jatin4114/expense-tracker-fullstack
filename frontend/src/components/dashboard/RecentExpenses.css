@@ -1,0 +1,47 @@
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.recent-item:last-child {
+  border-bottom: none;
+}
+
+.recent-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.recent-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.recent-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.recent-meta {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+
+.recent-amount {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
