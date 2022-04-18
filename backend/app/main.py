@@ -5,7 +5,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.database.db import Base, engine
+from app.models import user, expense  # noqa: F401 (needed so tables get created)
+from app.routes import expenses
+
 app = FastAPI(title="Smart Expense Tracker API")
+
+# creates the sqlite tables if they dont already exist
+# (not using alembic migrations for this project, keeping it simple)
+Base.metadata.create_all(bind=engine)
 
 # allow the react frontend (localhost:5173) to talk to this backend
 # without this we get CORS errors in the browser console
@@ -34,5 +42,7 @@ def health_check():
     return {"status": "ok"}
 
 
-# NOTE: routers for auth, expenses, analytics and budget
+app.include_router(expenses.router)
+
+# NOTE: routers for auth, analytics and budget
 # will be added here in later phases once they are built
