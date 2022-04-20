@@ -1,0 +1,19 @@
+.expenses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.expenses-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+@media (max-width: 500px) {
+  .expenses-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+}
