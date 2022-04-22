@@ -54,6 +54,23 @@
   text-align: right;
 }
 
+.expense-row-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.icon-btn:hover {
+  background: #f3f4f6;
+}
+
 @media (max-width: 700px) {
   .expense-row-method {
     display: none;

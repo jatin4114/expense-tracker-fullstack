@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getExpenses, createExpense } from "../api/expenses";
+import { getExpenses, createExpense, updateExpense } from "../api/expenses";
 import ExpenseList from "../components/expenses/ExpenseList";
 import ExpenseForm from "../components/expenses/ExpenseForm";
 import Modal from "../components/common/Modal";
@@ -11,7 +11,9 @@ function Expenses() {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingExpense, setEditingExpense] = useState(null);
 
   useEffect(() => {
     loadExpenses();
@@ -35,6 +37,12 @@ function Expenses() {
     setShowAddModal(false);
   }
 
+  async function handleEditExpense(formData) {
+    const updated = await updateExpense(editingExpense.id, formData);
+    setExpenses((prev) => prev.map((exp) => (exp.id === updated.id ? updated : exp)));
+    setEditingExpense(null);
+  }
+
   return (
     <div>
       <div className="expenses-header">
@@ -47,7 +55,9 @@ function Expenses() {
       <div className="card">
         {loading && <LoadingSpinner text="Loading expenses..." />}
         {!loading && error && <ErrorMessage message={error} onRetry={loadExpenses} />}
-        {!loading && !error && <ExpenseList expenses={expenses} />}
+        {!loading && !error && (
+          <ExpenseList expenses={expenses} onEdit={(exp) => setEditingExpense(exp)} />
+        )}
       </div>
 
       {showAddModal && (
@@ -56,6 +66,17 @@ function Expenses() {
             onSubmit={handleAddExpense}
             onCancel={() => setShowAddModal(false)}
             submitLabel="Add Expense"
+          />
+        </Modal>
+      )}
+
+      {editingExpense && (
+        <Modal title="Edit Expense" onClose={() => setEditingExpense(null)}>
+          <ExpenseForm
+            initialData={editingExpense}
+            onSubmit={handleEditExpense}
+            onCancel={() => setEditingExpense(null)}
+            submitLabel="Save Changes"
           />
         </Modal>
       )}
