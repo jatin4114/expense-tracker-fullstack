@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { getExpenses, createExpense, updateExpense } from "../api/expenses";
+import { getExpenses, createExpense, updateExpense, deleteExpense } from "../api/expenses";
 import ExpenseList from "../components/expenses/ExpenseList";
 import ExpenseForm from "../components/expenses/ExpenseForm";
+import DeleteConfirm from "../components/expenses/DeleteConfirm";
 import Modal from "../components/common/Modal";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import ErrorMessage from "../components/common/ErrorMessage";
@@ -14,6 +15,7 @@ function Expenses() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
+  const [deletingExpense, setDeletingExpense] = useState(null);
 
   useEffect(() => {
     loadExpenses();
@@ -43,6 +45,12 @@ function Expenses() {
     setEditingExpense(null);
   }
 
+  async function handleDeleteExpense(expense) {
+    await deleteExpense(expense.id);
+    setExpenses((prev) => prev.filter((exp) => exp.id !== expense.id));
+    setDeletingExpense(null);
+  }
+
   return (
     <div>
       <div className="expenses-header">
@@ -56,7 +64,11 @@ function Expenses() {
         {loading && <LoadingSpinner text="Loading expenses..." />}
         {!loading && error && <ErrorMessage message={error} onRetry={loadExpenses} />}
         {!loading && !error && (
-          <ExpenseList expenses={expenses} onEdit={(exp) => setEditingExpense(exp)} />
+          <ExpenseList
+            expenses={expenses}
+            onEdit={(exp) => setEditingExpense(exp)}
+            onDelete={(exp) => setDeletingExpense(exp)}
+          />
         )}
       </div>
 
@@ -79,6 +91,14 @@ function Expenses() {
             submitLabel="Save Changes"
           />
         </Modal>
+      )}
+
+      {deletingExpense && (
+        <DeleteConfirm
+          expense={deletingExpense}
+          onConfirm={handleDeleteExpense}
+          onCancel={() => setDeletingExpense(null)}
+        />
       )}
     </div>
   );

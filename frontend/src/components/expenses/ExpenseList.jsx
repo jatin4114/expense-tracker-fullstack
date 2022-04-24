@@ -2,8 +2,8 @@ import { CATEGORY_COLORS } from "../../utils/categories";
 import EmptyState from "../common/EmptyState";
 import "./ExpenseList.css";
 
-// list of expenses, with an edit button on each row
-function ExpenseList({ expenses, onEdit }) {
+// list of expenses, with edit/delete buttons on each row
+function ExpenseList({ expenses, onEdit, onDelete }) {
   if (expenses.length === 0) {
     return (
       <EmptyState
@@ -37,6 +37,9 @@ function ExpenseList({ expenses, onEdit }) {
           <div className="expense-row-actions">
             <button className="icon-btn" title="Edit" onClick={() => onEdit(exp)}>
               ✏️
+            </button>
+            <button className="icon-btn" title="Delete" onClick={() => onDelete(exp)}>
+              🗑️
             </button>
           </div>
         </div>
