@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getExpenses, createExpense, updateExpense, deleteExpense } from "../api/expenses";
 import ExpenseList from "../components/expenses/ExpenseList";
 import ExpenseForm from "../components/expenses/ExpenseForm";
+import ExpenseFilters from "../components/expenses/ExpenseFilters";
 import DeleteConfirm from "../components/expenses/DeleteConfirm";
 import Modal from "../components/common/Modal";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -16,6 +17,11 @@ function Expenses() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
   const [deletingExpense, setDeletingExpense] = useState(null);
+
+  // filter state
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [month, setMonth] = useState(""); // format: "2026-09"
 
   useEffect(() => {
     loadExpenses();
@@ -51,6 +57,17 @@ function Expenses() {
     setDeletingExpense(null);
   }
 
+  // apply search + category + month filters (all client side, list is
+  // small enough that we dont need to hit the api again for this)
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter((exp) => {
+      const matchesSearch = exp.title.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = category === "All" || exp.category === category;
+      const matchesMonth = !month || exp.date.startsWith(month);
+      return matchesSearch && matchesCategory && matchesMonth;
+    });
+  }, [expenses, search, category, month]);
+
   return (
     <div>
       <div className="expenses-header">
@@ -60,12 +77,23 @@ function Expenses() {
         </button>
       </div>
 
+      {!loading && !error && (
+        <ExpenseFilters
+          search={search}
+          setSearch={setSearch}
+          category={category}
+          setCategory={setCategory}
+          month={month}
+          setMonth={setMonth}
+        />
+      )}
+
       <div className="card">
         {loading && <LoadingSpinner text="Loading expenses..." />}
         {!loading && error && <ErrorMessage message={error} onRetry={loadExpenses} />}
         {!loading && !error && (
           <ExpenseList
-            expenses={expenses}
+            expenses={filteredExpenses}
             onEdit={(exp) => setEditingExpense(exp)}
             onDelete={(exp) => setDeletingExpense(exp)}
           />
