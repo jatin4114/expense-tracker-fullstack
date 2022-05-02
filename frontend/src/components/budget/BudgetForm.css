@@ -1,0 +1,12 @@
+.budget-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+@media (max-width: 500px) {
+  .budget-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

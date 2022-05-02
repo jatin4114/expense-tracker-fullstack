@@ -1,33 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
 import { getExpenses } from "../api/expenses";
+import { getBudget } from "../api/budget";
 import SummaryCard from "../components/dashboard/SummaryCard";
 import RecentExpenses from "../components/dashboard/RecentExpenses";
 import SpendingChart from "../components/dashboard/SpendingChart";
+import BudgetProgress from "../components/budget/BudgetProgress";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import ErrorMessage from "../components/common/ErrorMessage";
-import { sampleBudget } from "../utils/sampleData";
 import "./Dashboard.css";
 
 function Dashboard() {
   const [expenses, setExpenses] = useState([]);
+  const [budget, setBudget] = useState({ monthly_limit: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // TODO phase 8: replace sampleBudget with the real budget from the api
-  const budget = sampleBudget;
-
   useEffect(() => {
-    loadExpenses();
+    loadData();
   }, []);
 
-  function loadExpenses() {
+  function loadData() {
     setLoading(true);
     setError(null);
-    getExpenses()
-      .then((data) => setExpenses(data))
+    Promise.all([getExpenses(), getBudget()])
+      .then(([expensesRes, budgetRes]) => {
+        setExpenses(expensesRes);
+        setBudget(budgetRes);
+      })
       .catch((err) => {
         console.error(err);
-        setError("Could not load your expenses. Is the backend running?");
+        setError("Could not load your dashboard. Is the backend running?");
       })
       .finally(() => setLoading(false));
   }
@@ -52,7 +54,7 @@ function Dashboard() {
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={loadExpenses} />;
+    return <ErrorMessage message={error} onRetry={loadData} />;
   }
 
   return (
@@ -80,6 +82,11 @@ function Dashboard() {
           value={expenses.length}
           icon="🧾"
         />
+      </div>
+
+      <div className="card" style={{ marginBottom: 16 }}>
+        <h2 className="section-title">Budget Progress</h2>
+        <BudgetProgress spent={monthSpending} limit={budget.monthly_limit} />
       </div>
 
       <div className="dashboard-grid">

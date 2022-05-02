@@ -1,0 +1,11 @@
+.budget-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+}
+
+.section-title {
+  font-size: 16px;
+  margin: 0 0 16px 0;
+}
