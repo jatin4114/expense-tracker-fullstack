@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.db import Base, engine
 from app.models import user, expense, budget  # noqa: F401 (needed so tables get created)
-from app.routes import expenses, analytics, budget as budget_routes
+from app.routes import expenses, analytics, budget as budget_routes, auth
 
 app = FastAPI(title="Smart Expense Tracker API")
 
@@ -42,8 +42,7 @@ def health_check():
     return {"status": "ok"}
 
 
+app.include_router(auth.router)
 app.include_router(expenses.router)
 app.include_router(analytics.router)
 app.include_router(budget_routes.router)
-
-# NOTE: router for auth will be added here once its built (phase 9)
