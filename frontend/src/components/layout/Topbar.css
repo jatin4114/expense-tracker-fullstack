@@ -15,6 +15,24 @@
   font-size: 20px;
   font-weight: 600;
   margin: 0;
+  flex: 1;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-email {
+  font-size: 13px;
+  color: var(--color-text-light);
+}
+
+@media (max-width: 600px) {
+  .topbar-email {
+    display: none;
+  }
 }
 
 .menu-btn {
