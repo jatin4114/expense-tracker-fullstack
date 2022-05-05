@@ -5,18 +5,23 @@ import Modal from "../common/Modal";
 // (dont want people to accidentally delete stuff with one click)
 function DeleteConfirm({ expense, onConfirm, onCancel }) {
   const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleConfirm() {
     setDeleting(true);
+    setError("");
     try {
       await onConfirm(expense);
-    } finally {
+    } catch (err) {
+      console.error(err);
+      setError("Could not delete this expense. Please try again.");
       setDeleting(false);
     }
   }
 
   return (
     <Modal title="Delete Expense" onClose={onCancel}>
+      {error && <div className="form-top-error">{error}</div>}
       <p>
         Are you sure you want to delete <strong>{expense.title}</strong> (₹
         {expense.amount})? This cannot be undone.

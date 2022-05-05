@@ -47,6 +47,7 @@ function Dashboard() {
 
   const totalSpending = expenses.reduce((sum, e) => sum + e.amount, 0);
   const monthSpending = thisMonthExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const hasBudget = budget.monthly_limit > 0;
   const remainingBudget = budget.monthly_limit - monthSpending;
 
   if (loading) {
@@ -73,9 +74,9 @@ function Dashboard() {
         />
         <SummaryCard
           label="Remaining Budget"
-          value={`₹${remainingBudget}`}
+          value={hasBudget ? `₹${remainingBudget}` : "Not set"}
           icon="🎯"
-          accent={remainingBudget < 0 ? "red" : "green"}
+          accent={hasBudget ? (remainingBudget < 0 ? "red" : "green") : ""}
         />
         <SummaryCard
           label="Total Expenses"

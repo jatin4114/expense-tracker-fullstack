@@ -3,13 +3,19 @@ import EmptyState from "../common/EmptyState";
 import "./ExpenseList.css";
 
 // list of expenses, with edit/delete buttons on each row
-function ExpenseList({ expenses, onEdit, onDelete }) {
+function ExpenseList({ expenses, onEdit, onDelete, hasFilters }) {
   if (expenses.length === 0) {
-    return (
+    return hasFilters ? (
+      <EmptyState
+        icon="🔍"
+        title="No matching expenses"
+        message="Try adjusting or clearing your filters."
+      />
+    ) : (
       <EmptyState
         icon="🧾"
-        title="No expenses found"
-        message="Try adding one using the button above."
+        title="No expenses yet"
+        message="Add your first expense using the button above."
       />
     );
   }

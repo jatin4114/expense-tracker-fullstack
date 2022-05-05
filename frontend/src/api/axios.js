@@ -15,4 +15,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// if the token is expired/invalid, the backend sends back a 401 - when
+// that happens just log the user out and send them back to login
+// instead of showing them a confusing error
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userEmail");
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

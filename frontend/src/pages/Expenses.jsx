@@ -96,6 +96,7 @@ function Expenses() {
             expenses={filteredExpenses}
             onEdit={(exp) => setEditingExpense(exp)}
             onDelete={(exp) => setDeletingExpense(exp)}
+            hasFilters={!!(search || category !== "All" || month)}
           />
         )}
       </div>
