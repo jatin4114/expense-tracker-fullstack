@@ -76,6 +76,25 @@ def test_get_nonexistent_expense_404s(client, auth_headers):
     assert res.status_code == 404
 
 
+def test_export_csv(client, auth_headers):
+    client.post(
+        "/expenses",
+        json={"title": "Pizza", "amount": 250, "category": "Food", "date": "2026-09-01"},
+        headers=auth_headers,
+    )
+    res = client.get("/expenses/export", headers=auth_headers)
+    assert res.status_code == 200
+    assert res.headers["content-type"].startswith("text/csv")
+    assert "attachment" in res.headers["content-disposition"]
+    assert "Title,Amount,Category,Date,Description,Payment Method" in res.text
+    assert "Pizza" in res.text
+
+
+def test_export_csv_requires_auth(client):
+    res = client.get("/expenses/export")
+    assert res.status_code == 401
+
+
 def test_users_only_see_their_own_expenses(client):
     # register two separate users
     client.post("/auth/register", json={"email": "userA@test.com", "password": "pass123"})

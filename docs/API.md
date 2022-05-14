@@ -84,6 +84,12 @@ greater than 0. `description` and `payment_method` are optional.
 **Response `201`:** the created expense (includes `id` and
 `created_at`).
 
+### GET /expenses/export
+
+Downloads all your expenses as a CSV file (`Content-Disposition:
+attachment`) - columns are Title, Amount, Category, Date, Description,
+Payment Method.
+
 ### GET /expenses/{id}
 
 Returns a single expense. `404` if it doesn't exist or belongs to

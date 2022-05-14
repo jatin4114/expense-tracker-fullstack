@@ -2,6 +2,8 @@
 # all the actual db logic for expenses lives here, so the routes file
 # stays small and just handles http stuff
 
+import csv
+import io
 from sqlalchemy.orm import Session
 from app.models.expense import Expense
 from app.schemas.expense import ExpenseCreate, ExpenseUpdate
@@ -54,3 +56,21 @@ def update_expense(db: Session, expense: Expense, expense_data: ExpenseUpdate):
 def delete_expense(db: Session, expense: Expense):
     db.delete(expense)
     db.commit()
+
+
+def export_expenses_csv(db: Session, user_id: int = None) -> str:
+    # builds a csv file (as a string) of all the user's expenses, so
+    # they can download their data and open it in excel/sheets
+    expenses = get_expenses(db, user_id)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        ["Title", "Amount", "Category", "Date", "Description", "Payment Method"]
+    )
+    for exp in expenses:
+        writer.writerow(
+            [exp.title, exp.amount, exp.category, exp.date, exp.description or "", exp.payment_method or ""]
+        )
+
+    return output.getvalue()

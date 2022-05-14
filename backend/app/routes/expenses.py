@@ -3,6 +3,7 @@
 # own expenses
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.database.db import get_db
@@ -17,6 +18,18 @@ router = APIRouter(prefix="/expenses", tags=["expenses"])
 @router.get("", response_model=list[ExpenseOut])
 def list_expenses(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return expense_service.get_expenses(db, current_user.id)
+
+
+# NOTE: this has to be defined before GET /{expense_id}, otherwise
+# fastapi tries to match "export" as an expense_id and 422s
+@router.get("/export")
+def export_expenses(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    csv_data = expense_service.export_expenses_csv(db, current_user.id)
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=expenses.csv"},
+    )
 
 
 @router.post("", response_model=ExpenseOut, status_code=201)
