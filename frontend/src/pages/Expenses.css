@@ -10,10 +10,19 @@
   font-size: 18px;
 }
 
+.expenses-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
 @media (max-width: 500px) {
   .expenses-header {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+  }
+
+  .expenses-header-actions {
+    flex-direction: column;
   }
 }

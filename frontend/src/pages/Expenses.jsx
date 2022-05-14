@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { getExpenses, createExpense, updateExpense, deleteExpense } from "../api/expenses";
+import {
+  getExpenses,
+  createExpense,
+  updateExpense,
+  deleteExpense,
+  exportExpensesCSV,
+} from "../api/expenses";
 import ExpenseList from "../components/expenses/ExpenseList";
 import ExpenseForm from "../components/expenses/ExpenseForm";
 import ExpenseFilters from "../components/expenses/ExpenseFilters";
@@ -17,6 +23,7 @@ function Expenses() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
   const [deletingExpense, setDeletingExpense] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   // filter state
   const [search, setSearch] = useState("");
@@ -57,6 +64,28 @@ function Expenses() {
     setDeletingExpense(null);
   }
 
+  async function handleExportCSV() {
+    setExporting(true);
+    try {
+      const blob = await exportExpensesCSV();
+      // create a temporary link to trigger the browser's save dialog,
+      // then clean it up right after
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "expenses.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Could not export expenses. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
   // apply search + category + month filters (all client side, list is
   // small enough that we dont need to hit the api again for this)
   const filteredExpenses = useMemo(() => {
@@ -72,9 +101,14 @@ function Expenses() {
     <div>
       <div className="expenses-header">
         <h2>All Expenses</h2>
-        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-          + Add Expense
-        </button>
+        <div className="expenses-header-actions">
+          <button className="btn btn-secondary" onClick={handleExportCSV} disabled={exporting}>
+            {exporting ? "Exporting..." : "⬇ Export CSV"}
+          </button>
+          <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+            + Add Expense
+          </button>
+        </div>
       </div>
 
       {!loading && !error && (

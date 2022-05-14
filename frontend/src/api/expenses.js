@@ -17,3 +17,8 @@ export function updateExpense(id, data) {
 export function deleteExpense(id) {
   return api.delete(`/expenses/${id}`);
 }
+
+// downloads all the user's expenses as a csv file
+export function exportExpensesCSV() {
+  return api.get("/expenses/export", { responseType: "blob" }).then((res) => res.data);
+}

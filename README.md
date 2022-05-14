@@ -38,6 +38,7 @@ its just a file).
   date, description and payment method
 - 🔍 **Search & filters** - search by title, filter by category, filter by
   month
+- 📁 **CSV export** - download all your expenses as a `.csv` file
 - 📈 **Analytics** - total/average-daily/highest spending, category
   breakdown (pie chart), monthly trend (line chart)
 - 🎯 **Budget** - set a monthly limit, see progress, get warned at 80% used
