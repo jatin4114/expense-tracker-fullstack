@@ -1,0 +1,26 @@
+# lets you run the whole app with one command: docker compose up
+# (not required for local dev - venv/npm still works fine - this is
+# just here for anyone who wants a one-command setup)
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=sqlite:///./expense_tracker.db
+      - SECRET_KEY=dev_secret_change_me
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
