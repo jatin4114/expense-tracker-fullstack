@@ -13,9 +13,11 @@ import DeleteConfirm from "../components/expenses/DeleteConfirm";
 import Modal from "../components/common/Modal";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import ErrorMessage from "../components/common/ErrorMessage";
+import { useToast } from "../context/ToastContext";
 import "./Expenses.css";
 
 function Expenses() {
+  const { showToast } = useToast();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -50,18 +52,21 @@ function Expenses() {
     const newExpense = await createExpense(formData);
     setExpenses((prev) => [newExpense, ...prev]);
     setShowAddModal(false);
+    showToast("Expense added", "success");
   }
 
   async function handleEditExpense(formData) {
     const updated = await updateExpense(editingExpense.id, formData);
     setExpenses((prev) => prev.map((exp) => (exp.id === updated.id ? updated : exp)));
     setEditingExpense(null);
+    showToast("Expense updated", "success");
   }
 
   async function handleDeleteExpense(expense) {
     await deleteExpense(expense.id);
     setExpenses((prev) => prev.filter((exp) => exp.id !== expense.id));
     setDeletingExpense(null);
+    showToast("Expense deleted", "success");
   }
 
   async function handleExportCSV() {
@@ -78,9 +83,10 @@ function Expenses() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+      showToast("Expenses exported", "success");
     } catch (err) {
       console.error(err);
-      alert("Could not export expenses. Please try again.");
+      showToast("Could not export expenses. Please try again.", "error");
     } finally {
       setExporting(false);
     }

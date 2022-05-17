@@ -20,6 +20,20 @@
   font-family: "Segoe UI", Roboto, -apple-system, sans-serif;
 }
 
+/* dark mode - toggled by adding data-theme="dark" to <html> (see
+   ThemeContext.jsx). same variable names, just different values, so
+   everything else in the app just works without extra changes */
+[data-theme="dark"] {
+  --color-primary: #6366f1;
+  --color-primary-dark: #818cf8;
+  --color-bg: #14121f;
+  --color-sidebar: #0f0d1a;
+  --color-text: #e5e7eb;
+  --color-text-light: #9ca3af;
+  --color-border: #2d2a3d;
+  --color-white: #1e1b2e;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -43,6 +57,15 @@ a {
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+/* so inputs/selects pick up dark mode colors too instead of staying
+   the browser's default white */
+input,
+select,
+textarea {
+  background: var(--color-white);
+  color: var(--color-text);
 }
 
 /* small helper classes i keep reusing everywhere */
