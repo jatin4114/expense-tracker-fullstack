@@ -15,11 +15,14 @@ app = FastAPI(title="Smart Expense Tracker API")
 # (not using alembic migrations for this project, keeping it simple)
 Base.metadata.create_all(bind=engine)
 
-# allow the react frontend (localhost:5173) to talk to this backend
-# without this we get CORS errors in the browser console
+# allow the react frontend to talk to this backend - without this we
+# get CORS errors in the browser console. allowing a small range of
+# vite dev ports (not just 5173) since vite auto-bumps to the next
+# free port if 5173 is already taken by something else
 origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    f"http://{host}:{port}"
+    for host in ("localhost", "127.0.0.1")
+    for port in range(5173, 5178)
 ]
 
 app.add_middleware(
