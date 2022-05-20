@@ -1,3 +1,14 @@
+.bulk-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-bg);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
 .expense-list-header {
   display: flex;
   align-items: center;
@@ -42,6 +53,13 @@
   gap: 14px;
   padding: 14px 4px;
   border-bottom: 1px solid var(--color-border);
+}
+
+.expense-row input[type="checkbox"],
+.expense-list-header input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .expense-row:last-child {

@@ -11,7 +11,7 @@ import ExpenseForm from "../components/expenses/ExpenseForm";
 import ExpenseFilters from "../components/expenses/ExpenseFilters";
 import DeleteConfirm from "../components/expenses/DeleteConfirm";
 import Modal from "../components/common/Modal";
-import LoadingSpinner from "../components/common/LoadingSpinner";
+import { SkeletonList } from "../components/common/Skeleton";
 import ErrorMessage from "../components/common/ErrorMessage";
 import { useToast } from "../context/ToastContext";
 import "./Expenses.css";
@@ -66,7 +66,56 @@ function Expenses() {
     await deleteExpense(expense.id);
     setExpenses((prev) => prev.filter((exp) => exp.id !== expense.id));
     setDeletingExpense(null);
-    showToast("Expense deleted", "success");
+    // "undo" just re-creates the same expense - it'll get a new id,
+    // but thats fine for what this is for (fixing a misclick)
+    showToast("Expense deleted", "info", {
+      label: "Undo",
+      onClick: async () => {
+        const restored = await createExpense({
+          title: expense.title,
+          amount: expense.amount,
+          category: expense.category,
+          date: expense.date,
+          description: expense.description,
+          payment_method: expense.payment_method,
+        });
+        setExpenses((prev) => [restored, ...prev]);
+        showToast("Expense restored", "success");
+      },
+    });
+  }
+
+  async function handleDuplicateExpense(expense) {
+    const copy = await createExpense({
+      title: expense.title,
+      amount: expense.amount,
+      category: expense.category,
+      date: expense.date,
+      description: expense.description,
+      payment_method: expense.payment_method,
+    });
+    setExpenses((prev) => [copy, ...prev]);
+    showToast("Expense duplicated", "success");
+  }
+
+  async function handleBulkDelete(ids) {
+    // delete them one at a time - the list is small enough that this
+    // is fine, and it means one failure doesnt take out the whole batch
+    let failCount = 0;
+    for (const id of ids) {
+      try {
+        await deleteExpense(id);
+      } catch (err) {
+        console.error(err);
+        failCount++;
+      }
+    }
+    setExpenses((prev) => prev.filter((exp) => !ids.includes(exp.id)));
+    if (failCount > 0) {
+      showToast(`Deleted ${ids.length - failCount}, ${failCount} failed`, "error");
+    } else {
+      showToast(`${ids.length} expense(s) deleted`, "success");
+    }
   }
 
   async function handleExportCSV() {
@@ -129,13 +178,15 @@ function Expenses() {
       )}
 
       <div className="card">
-        {loading && <LoadingSpinner text="Loading expenses..." />}
+        {loading && <SkeletonList rows={5} />}
         {!loading && error && <ErrorMessage message={error} onRetry={loadExpenses} />}
         {!loading && !error && (
           <ExpenseList
             expenses={filteredExpenses}
             onEdit={(exp) => setEditingExpense(exp)}
             onDelete={(exp) => setDeletingExpense(exp)}
+            onDuplicate={handleDuplicateExpense}
+            onBulkDelete={handleBulkDelete}
             hasFilters={!!(search || category !== "All" || month)}
           />
         )}

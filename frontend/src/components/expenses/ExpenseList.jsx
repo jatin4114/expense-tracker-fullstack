@@ -6,12 +6,13 @@ import "./ExpenseList.css";
 
 const PAGE_SIZE = 10;
 
-// list of expenses, with edit/delete buttons, sortable columns and
-// pagination (so a long list doesnt just become one giant scroll)
-function ExpenseList({ expenses, onEdit, onDelete, hasFilters }) {
+// list of expenses, with edit/delete/duplicate buttons, checkboxes
+// for bulk delete, sortable columns and pagination
+function ExpenseList({ expenses, onEdit, onDelete, onDuplicate, onBulkDelete, hasFilters }) {
   const [sortField, setSortField] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
   const [page, setPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState(new Set());
 
   function handleSort(field) {
     if (field === sortField) {
@@ -41,6 +42,34 @@ function ExpenseList({ expenses, onEdit, onDelete, hasFilters }) {
     currentPage * PAGE_SIZE
   );
 
+  function toggleSelect(id) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAllOnPage() {
+    const pageIds = pageExpenses.map((e) => e.id);
+    const allSelected = pageIds.every((id) => selectedIds.has(id));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allSelected) {
+        pageIds.forEach((id) => next.delete(id));
+      } else {
+        pageIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  }
+
+  function handleBulkDelete() {
+    onBulkDelete(Array.from(selectedIds));
+    setSelectedIds(new Set());
+  }
+
   if (expenses.length === 0) {
     return hasFilters ? (
       <EmptyState
@@ -62,9 +91,27 @@ function ExpenseList({ expenses, onEdit, onDelete, hasFilters }) {
     return sortDir === "asc" ? " ▲" : " ▼";
   }
 
+  const allOnPageSelected =
+    pageExpenses.length > 0 && pageExpenses.every((e) => selectedIds.has(e.id));
+
   return (
     <div>
+      {selectedIds.size > 0 && (
+        <div className="bulk-actions-bar">
+          <span>{selectedIds.size} selected</span>
+          <button className="btn btn-danger" onClick={handleBulkDelete}>
+            Delete Selected
+          </button>
+        </div>
+      )}
+
       <div className="expense-list-header">
+        <input
+          type="checkbox"
+          checked={allOnPageSelected}
+          onChange={toggleSelectAllOnPage}
+          title="Select all on this page"
+        />
         <button className="sort-btn" onClick={() => handleSort("title")}>
           Title{sortArrow("title")}
         </button>
@@ -79,6 +126,11 @@ function ExpenseList({ expenses, onEdit, onDelete, hasFilters }) {
       <div className="expense-list">
         {pageExpenses.map((exp) => (
           <div key={exp.id} className="expense-row">
+            <input
+              type="checkbox"
+              checked={selectedIds.has(exp.id)}
+              onChange={() => toggleSelect(exp.id)}
+            />
             <span
               className="expense-cat-badge"
               style={{
@@ -96,6 +148,9 @@ function ExpenseList({ expenses, onEdit, onDelete, hasFilters }) {
             <p className="expense-row-method">{exp.payment_method}</p>
             <p className="expense-row-amount">₹{exp.amount}</p>
             <div className="expense-row-actions">
+              <button className="icon-btn" title="Duplicate" onClick={() => onDuplicate(exp)}>
+                📋
+              </button>
               <button className="icon-btn" title="Edit" onClick={() => onEdit(exp)}>
                 ✏️
               </button>

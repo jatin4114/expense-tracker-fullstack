@@ -9,6 +9,10 @@
 }
 
 .toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 12px 18px;
   border-radius: 8px;
   color: white;
@@ -16,6 +20,21 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: toast-in 0.2s ease;
   max-width: 320px;
+}
+
+.toast-action {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.toast-action:hover {
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .toast-info {
