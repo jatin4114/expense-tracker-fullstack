@@ -1,7 +1,9 @@
-# auth_service.py - register / login logic
+# auth_service.py - register / login / account management logic
 
 from sqlalchemy.orm import Session
 from app.models.user import User
+from app.models.expense import Expense
+from app.models.budget import Budget
 from app.schemas.user import UserCreate
 from app.auth.security import hash_password, verify_password
 
@@ -28,3 +30,17 @@ def authenticate_user(db: Session, email: str, password: str):
     if not verify_password(password, user.hashed_password):
         return None
     return user
+
+
+def change_password(db: Session, user: User, new_password: str):
+    user.hashed_password = hash_password(new_password)
+    db.commit()
+
+
+def delete_account(db: Session, user: User):
+    # clean up everything that belongs to this user before deleting
+    # the user row itself, so we dont leave orphaned rows behind
+    db.query(Expense).filter(Expense.user_id == user.id).delete()
+    db.query(Budget).filter(Budget.user_id == user.id).delete()
+    db.delete(user)
+    db.commit()

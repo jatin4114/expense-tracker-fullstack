@@ -26,3 +26,12 @@ class UserOut(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=6, description="at least 6 characters")
+
+
+class AccountDelete(BaseModel):
+    password: str

@@ -44,3 +44,64 @@ def test_login_wrong_password_fails(client):
 def test_login_nonexistent_user_fails(client):
     res = client.post("/auth/login", json={"email": "ghost@test.com", "password": "pass123"})
     assert res.status_code == 401
+
+
+def test_get_me(client, auth_headers):
+    res = client.get("/auth/me", headers=auth_headers)
+    assert res.status_code == 200
+    assert res.json()["email"] == "test@example.com"
+
+
+def test_get_me_requires_auth(client):
+    res = client.get("/auth/me")
+    assert res.status_code == 401
+
+
+def test_change_password(client, auth_headers):
+    res = client.put(
+        "/auth/password",
+        json={"current_password": "pass123", "new_password": "newpass456"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 200
+
+    # old password should no longer work
+    old_login = client.post(
+        "/auth/login", json={"email": "test@example.com", "password": "pass123"}
+    )
+    assert old_login.status_code == 401
+
+    # new password should work
+    new_login = client.post(
+        "/auth/login", json={"email": "test@example.com", "password": "newpass456"}
+    )
+    assert new_login.status_code == 200
+
+
+def test_change_password_wrong_current_fails(client, auth_headers):
+    res = client.put(
+        "/auth/password",
+        json={"current_password": "wrongpassword", "new_password": "newpass456"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+
+
+def test_delete_account(client, auth_headers):
+    res = client.request(
+        "DELETE", "/auth/me", json={"password": "pass123"}, headers=auth_headers
+    )
+    assert res.status_code == 204
+
+    # cant log in anymore after deleting
+    login_res = client.post(
+        "/auth/login", json={"email": "test@example.com", "password": "pass123"}
+    )
+    assert login_res.status_code == 401
+
+
+def test_delete_account_wrong_password_fails(client, auth_headers):
+    res = client.request(
+        "DELETE", "/auth/me", json={"password": "wrongpassword"}, headers=auth_headers
+    )
+    assert res.status_code == 400
