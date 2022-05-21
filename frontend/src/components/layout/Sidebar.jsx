@@ -7,6 +7,7 @@ const navItems = [
   { to: "/expenses", label: "Expenses", icon: "💸" },
   { to: "/analytics", label: "Analytics", icon: "📊" },
   { to: "/budget", label: "Budget", icon: "🎯" },
+  { to: "/profile", label: "Profile", icon: "👤" },
 ];
 
 function Sidebar({ isOpen, onClose }) {

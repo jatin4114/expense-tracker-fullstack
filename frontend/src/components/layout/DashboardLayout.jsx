@@ -10,6 +10,7 @@ const PAGE_TITLES = {
   "/expenses": "Expenses",
   "/analytics": "Analytics",
   "/budget": "Budget",
+  "/profile": "Profile",
 };
 
 // this wraps every "logged in" page - has the sidebar + topbar
