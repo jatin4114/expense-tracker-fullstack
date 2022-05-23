@@ -1,0 +1,52 @@
+.category-budget-row {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.category-budget-row:last-of-type {
+  border-bottom: none;
+}
+
+.category-budget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.category-budget-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.category-budget-add {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.category-budget-add select,
+.category-budget-add input {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.category-budget-add select {
+  flex: 1;
+}
+
+.category-budget-add input {
+  width: 120px;
+}
+
+@media (max-width: 500px) {
+  .category-budget-add {
+    flex-direction: column;
+  }
+
+  .category-budget-add input {
+    width: 100%;
+  }
+}
