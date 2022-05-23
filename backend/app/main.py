@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.db import Base, engine
-from app.models import user, expense, budget  # noqa: F401 (needed so tables get created)
+from app.models import user, expense, budget, category_budget  # noqa: F401 (needed so tables get created)
 from app.routes import expenses, analytics, budget as budget_routes, auth
 
 app = FastAPI(title="Smart Expense Tracker API")
