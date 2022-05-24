@@ -14,6 +14,7 @@ import Modal from "../components/common/Modal";
 import { SkeletonList } from "../components/common/Skeleton";
 import ErrorMessage from "../components/common/ErrorMessage";
 import { useToast } from "../context/ToastContext";
+import { useKeyboardShortcut } from "../utils/useKeyboardShortcut";
 import "./Expenses.css";
 
 function Expenses() {
@@ -35,6 +36,21 @@ function Expenses() {
   useEffect(() => {
     loadExpenses();
   }, []);
+
+  const anyModalOpen = showAddModal || !!editingExpense || !!deletingExpense;
+
+  // keyboard shortcuts: "n" opens the add expense modal, "Escape"
+  // closes whatever modal is currently open
+  useKeyboardShortcut("n", () => setShowAddModal(true), !anyModalOpen);
+  useKeyboardShortcut(
+    "Escape",
+    () => {
+      setShowAddModal(false);
+      setEditingExpense(null);
+      setDeletingExpense(null);
+    },
+    anyModalOpen
+  );
 
   function loadExpenses() {
     setLoading(true);
@@ -160,7 +176,11 @@ function Expenses() {
           <button className="btn btn-secondary" onClick={handleExportCSV} disabled={exporting}>
             {exporting ? "Exporting..." : "⬇ Export CSV"}
           </button>
-          <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowAddModal(true)}
+            title="Shortcut: press N"
+          >
             + Add Expense
           </button>
         </div>
