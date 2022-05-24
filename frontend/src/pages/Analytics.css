@@ -1,3 +1,9 @@
+.analytics-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
 .analytics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

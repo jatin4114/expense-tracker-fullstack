@@ -51,6 +51,12 @@ function Analytics() {
 
   return (
     <div>
+      <div className="analytics-header no-print">
+        <button className="btn btn-secondary" onClick={() => window.print()}>
+          🖨 Print Report
+        </button>
+      </div>
+
       <div className="summary-grid">
         <SummaryCard label="Total Spending" value={`₹${summary.total_spending}`} icon="💰" />
         <SummaryCard

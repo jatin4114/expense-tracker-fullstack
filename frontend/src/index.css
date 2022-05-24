@@ -112,3 +112,27 @@ textarea {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* print-friendly styles - hides the app chrome (sidebar/topbar/
+   buttons) so printing a page (eg the analytics report) just shows
+   the actual content, not the whole dashboard shell */
+@media print {
+  .sidebar,
+  .topbar,
+  .no-print {
+    display: none !important;
+  }
+
+  .layout-main {
+    margin-left: 0 !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  body {
+    background: white !important;
+  }
+}
