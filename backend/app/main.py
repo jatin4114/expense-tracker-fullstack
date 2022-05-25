@@ -8,6 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database.db import Base, engine
 from app.models import user, expense, budget, category_budget  # noqa: F401 (needed so tables get created)
 from app.routes import expenses, analytics, budget as budget_routes, auth
+from app.logging_config import setup_logging, get_logger
+
+setup_logging()
+logger = get_logger(__name__)
 
 app = FastAPI(title="Smart Expense Tracker API")
 
@@ -49,3 +53,5 @@ app.include_router(auth.router)
 app.include_router(expenses.router)
 app.include_router(analytics.router)
 app.include_router(budget_routes.router)
+
+logger.info("Smart Expense Tracker API startup complete")
