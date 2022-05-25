@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.database.db import Base, get_db
+from app.auth.rate_limit import _attempts as _rate_limit_attempts
 
 # in-memory db, StaticPool keeps the same connection alive for the
 # whole test (normally sqlite in-memory dbs disappear between connections)
@@ -39,6 +40,16 @@ def fresh_db():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limiter():
+    # the rate limiter tracks attempts in a plain module-level dict,
+    # and every TestClient request looks like it comes from the same
+    # fake IP - without this, tests would trip the real rate limit
+    # after a handful of login/register calls across the whole suite
+    _rate_limit_attempts.clear()
+    yield
 
 
 @pytest.fixture

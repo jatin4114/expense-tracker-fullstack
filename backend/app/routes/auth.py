@@ -9,12 +9,13 @@ from app.services import auth_service
 from app.auth.security import create_access_token, verify_password
 from app.models.user import User
 from app.auth.dependencies import get_current_user
+from app.auth.rate_limit import rate_limit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserOut, status_code=201)
-def register(user_data: UserCreate, db: Session = Depends(get_db)):
+def register(user_data: UserCreate, db: Session = Depends(get_db), _rl=Depends(rate_limit)):
     existing_user = auth_service.get_user_by_email(db, user_data.email)
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -23,7 +24,7 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=Token)
-def login(credentials: UserLogin, db: Session = Depends(get_db)):
+def login(credentials: UserLogin, db: Session = Depends(get_db), _rl=Depends(rate_limit)):
     user = auth_service.authenticate_user(db, credentials.email, credentials.password)
     if not user:
         raise HTTPException(

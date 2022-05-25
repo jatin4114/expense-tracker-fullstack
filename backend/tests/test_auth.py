@@ -46,6 +46,21 @@ def test_login_nonexistent_user_fails(client):
     assert res.status_code == 401
 
 
+def test_login_rate_limited_after_too_many_attempts(client):
+    client.post("/auth/register", json={"email": "ratelimit@test.com", "password": "pass123"})
+
+    # first 5 attempts go through normally (even though theyre wrong)
+    for _ in range(5):
+        res = client.post(
+            "/auth/login", json={"email": "ratelimit@test.com", "password": "wrong"}
+        )
+        assert res.status_code == 401
+
+    # the 6th should get rate limited instead
+    res = client.post("/auth/login", json={"email": "ratelimit@test.com", "password": "wrong"})
+    assert res.status_code == 429
+
+
 def test_get_me(client, auth_headers):
     res = client.get("/auth/me", headers=auth_headers)
     assert res.status_code == 200
