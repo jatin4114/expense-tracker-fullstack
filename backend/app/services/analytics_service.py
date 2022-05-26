@@ -65,3 +65,37 @@ def get_monthly_breakdown(db: Session, user_id: int = None):
     # sort by month so the chart line goes left to right chronologically
     sorted_months = sorted(totals.keys())
     return [{"month": m, "total": round(totals[m], 2)} for m in sorted_months]
+
+
+def get_top_titles(db: Session, user_id: int = None, limit: int = 5):
+    # which expense titles show up most often - eg if "Coffee" appears
+    # a bunch of times, that stands out here even if no single coffee
+    # purchase was very expensive
+    query = db.query(Expense.title, func.count(Expense.id).label("count"))
+    if user_id is not None:
+        query = query.filter(Expense.user_id == user_id)
+
+    results = (
+        query.group_by(Expense.title)
+        .order_by(func.count(Expense.id).desc())
+        .limit(limit)
+        .all()
+    )
+    return [{"title": title, "count": count} for title, count in results]
+
+
+def get_weekday_breakdown(db: Session, user_id: int = None):
+    # weekday (mon-fri) vs weekend (sat-sun) spending totals
+    query = db.query(Expense)
+    if user_id is not None:
+        query = query.filter(Expense.user_id == user_id)
+
+    weekday_total = 0
+    weekend_total = 0
+    for e in query.all():
+        if e.date.weekday() >= 5:  # 5=saturday, 6=sunday
+            weekend_total += e.amount
+        else:
+            weekday_total += e.amount
+
+    return {"weekday_total": round(weekday_total, 2), "weekend_total": round(weekend_total, 2)}

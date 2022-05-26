@@ -18,3 +18,13 @@ class CategoryTotal(BaseModel):
 class MonthlyTotal(BaseModel):
     month: str  # e.g. "2026-09"
     total: float
+
+
+class TopTitle(BaseModel):
+    title: str
+    count: int
+
+
+class WeekdayBreakdown(BaseModel):
+    weekday_total: float
+    weekend_total: float
