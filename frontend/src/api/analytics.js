@@ -11,3 +11,11 @@ export function getCategoryBreakdown() {
 export function getMonthlyBreakdown() {
   return api.get("/analytics/monthly").then((res) => res.data);
 }
+
+export function getTopTitles() {
+  return api.get("/analytics/top-titles").then((res) => res.data);
+}
+
+export function getWeekdayBreakdown() {
+  return api.get("/analytics/weekday-breakdown").then((res) => res.data);
+}

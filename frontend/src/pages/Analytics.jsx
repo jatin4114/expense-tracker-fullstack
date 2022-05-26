@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
-import { getSummary, getCategoryBreakdown, getMonthlyBreakdown } from "../api/analytics";
+import {
+  getSummary,
+  getCategoryBreakdown,
+  getMonthlyBreakdown,
+  getTopTitles,
+  getWeekdayBreakdown,
+} from "../api/analytics";
 import SummaryCard from "../components/dashboard/SummaryCard";
 import CategoryPieChart from "../components/analytics/CategoryPieChart";
 import MonthlyTrendChart from "../components/analytics/MonthlyTrendChart";
+import TopTitlesList from "../components/analytics/TopTitlesList";
+import WeekdayBreakdown from "../components/analytics/WeekdayBreakdown";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import ErrorMessage from "../components/common/ErrorMessage";
 import EmptyState from "../components/common/EmptyState";
@@ -12,6 +20,8 @@ function Analytics() {
   const [summary, setSummary] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
+  const [topTitles, setTopTitles] = useState([]);
+  const [weekdayData, setWeekdayData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -22,12 +32,20 @@ function Analytics() {
   function loadAnalytics() {
     setLoading(true);
     setError(null);
-    // fire all 3 requests at once instead of one after another
-    Promise.all([getSummary(), getCategoryBreakdown(), getMonthlyBreakdown()])
-      .then(([summaryRes, categoryRes, monthlyRes]) => {
+    // fire all requests at once instead of one after another
+    Promise.all([
+      getSummary(),
+      getCategoryBreakdown(),
+      getMonthlyBreakdown(),
+      getTopTitles(),
+      getWeekdayBreakdown(),
+    ])
+      .then(([summaryRes, categoryRes, monthlyRes, topTitlesRes, weekdayRes]) => {
         setSummary(summaryRes);
         setCategoryData(categoryRes);
         setMonthlyData(monthlyRes);
+        setTopTitles(topTitlesRes);
+        setWeekdayData(weekdayRes);
       })
       .catch((err) => {
         console.error(err);
@@ -83,6 +101,18 @@ function Analytics() {
         <div className="card">
           <h2 className="section-title">Monthly Trend</h2>
           <MonthlyTrendChart data={monthlyData} />
+        </div>
+      </div>
+
+      <div className="analytics-grid">
+        <div className="card">
+          <h2 className="section-title">Most Frequent Expenses</h2>
+          <TopTitlesList data={topTitles} />
+        </div>
+
+        <div className="card">
+          <h2 className="section-title">Weekday vs Weekend</h2>
+          <WeekdayBreakdown data={weekdayData} />
         </div>
       </div>
     </div>
