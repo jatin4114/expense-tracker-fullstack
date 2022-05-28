@@ -22,3 +22,14 @@ export function deleteExpense(id) {
 export function exportExpensesCSV() {
   return api.get("/expenses/export", { responseType: "blob" }).then((res) => res.data);
 }
+
+// uploads a csv file to bulk-create expenses
+export function importExpensesCSV(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return api
+    .post("/expenses/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then((res) => res.data);
+}

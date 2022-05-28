@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getExpenses,
   createExpense,
   updateExpense,
   deleteExpense,
   exportExpensesCSV,
+  importExpensesCSV,
 } from "../api/expenses";
 import ExpenseList from "../components/expenses/ExpenseList";
 import ExpenseForm from "../components/expenses/ExpenseForm";
@@ -27,6 +28,8 @@ function Expenses() {
   const [editingExpense, setEditingExpense] = useState(null);
   const [deletingExpense, setDeletingExpense] = useState(null);
   const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef(null);
 
   // filter state
   const [search, setSearch] = useState("");
@@ -157,6 +160,31 @@ function Expenses() {
     }
   }
 
+  async function handleImportCSV(e) {
+    const file = e.target.files[0];
+    e.target.value = ""; // reset so picking the same file again still fires onChange
+    if (!file) return;
+
+    setImporting(true);
+    try {
+      const result = await importExpensesCSV(file);
+      await loadExpenses();
+      if (result.errors.length > 0) {
+        showToast(
+          `Imported ${result.created}, ${result.errors.length} row(s) skipped`,
+          "info"
+        );
+      } else {
+        showToast(`Imported ${result.created} expense(s)`, "success");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Could not import that file. Please check the format.", "error");
+    } finally {
+      setImporting(false);
+    }
+  }
+
   // apply search + category + month filters (all client side, list is
   // small enough that we dont need to hit the api again for this)
   const filteredExpenses = useMemo(() => {
@@ -173,6 +201,20 @@ function Expenses() {
       <div className="expenses-header">
         <h2>All Expenses</h2>
         <div className="expenses-header-actions">
+          <input
+            type="file"
+            accept=".csv"
+            ref={fileInputRef}
+            onChange={handleImportCSV}
+            style={{ display: "none" }}
+          />
+          <button
+            className="btn btn-secondary"
+            onClick={() => fileInputRef.current.click()}
+            disabled={importing}
+          >
+            {importing ? "Importing..." : "⬆ Import CSV"}
+          </button>
           <button className="btn btn-secondary" onClick={handleExportCSV} disabled={exporting}>
             {exporting ? "Exporting..." : "⬇ Export CSV"}
           </button>
