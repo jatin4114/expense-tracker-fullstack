@@ -44,3 +44,13 @@ class ExpenseOut(BaseModel):
 
     class Config:
         from_attributes = True  # lets pydantic read straight from the sqlalchemy model
+
+
+class ImportError_(BaseModel):
+    row: int
+    error: str
+
+
+class ImportResult(BaseModel):
+    created: int
+    errors: list[ImportError_]

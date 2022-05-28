@@ -4,6 +4,8 @@
 
 import csv
 import io
+from datetime import datetime
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 from app.models.expense import Expense
 from app.schemas.expense import ExpenseCreate, ExpenseUpdate
@@ -74,3 +76,32 @@ def export_expenses_csv(db: Session, user_id: int = None) -> str:
         )
 
     return output.getvalue()
+
+
+def import_expenses_csv(db: Session, csv_text: str, user_id: int = None):
+    # reads the same format export_expenses_csv writes, but is
+    # forgiving about it - skips bad rows instead of failing the
+    # whole import, and reports which ones it skipped and why
+    reader = csv.DictReader(io.StringIO(csv_text))
+
+    created = 0
+    errors = []
+
+    for row_num, row in enumerate(reader, start=2):  # row 1 is the header
+        try:
+            expense_data = ExpenseCreate(
+                title=row.get("Title", ""),
+                amount=float(row.get("Amount", 0)),
+                category=row.get("Category", ""),
+                date=datetime.strptime(row.get("Date", ""), "%Y-%m-%d").date(),
+                description=row.get("Description") or None,
+                payment_method=row.get("Payment Method") or None,
+            )
+        except (ValidationError, ValueError, TypeError) as e:
+            errors.append({"row": row_num, "error": str(e)})
+            continue
+
+        create_expense(db, expense_data, user_id)
+        created += 1
+
+    return {"created": created, "errors": errors}

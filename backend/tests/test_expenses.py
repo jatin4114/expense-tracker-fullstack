@@ -95,6 +95,59 @@ def test_export_csv_requires_auth(client):
     assert res.status_code == 401
 
 
+def test_import_csv(client, auth_headers):
+    csv_content = (
+        "Title,Amount,Category,Date,Description,Payment Method\n"
+        "Pizza,250,Food,2026-09-01,with friends,UPI\n"
+        "Bus,100,Transport,2026-09-02,,Cash\n"
+    )
+    res = client.post(
+        "/expenses/import",
+        files={"file": ("expenses.csv", csv_content, "text/csv")},
+        headers=auth_headers,
+    )
+    assert res.status_code == 200
+    assert res.json() == {"created": 2, "errors": []}
+
+    list_res = client.get("/expenses", headers=auth_headers)
+    titles = {e["title"] for e in list_res.json()}
+    assert titles == {"Pizza", "Bus"}
+
+
+def test_import_csv_reports_bad_rows_without_failing_whole_import(client, auth_headers):
+    csv_content = (
+        "Title,Amount,Category,Date,Description,Payment Method\n"
+        "Pizza,250,Food,2026-09-01,,UPI\n"
+        "Bad,notanumber,Food,2026-09-02,,Cash\n"
+        "AlsoBad,100,NotACategory,2026-09-03,,Cash\n"
+    )
+    res = client.post(
+        "/expenses/import",
+        files={"file": ("expenses.csv", csv_content, "text/csv")},
+        headers=auth_headers,
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["created"] == 1
+    assert len(data["errors"]) == 2
+    assert data["errors"][0]["row"] == 3
+    assert data["errors"][1]["row"] == 4
+
+
+def test_import_non_csv_file_rejected(client, auth_headers):
+    res = client.post(
+        "/expenses/import",
+        files={"file": ("notes.txt", "just some text", "text/plain")},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+
+
+def test_import_requires_auth(client):
+    res = client.post("/expenses/import", files={"file": ("e.csv", "Title\n", "text/csv")})
+    assert res.status_code == 401
+
+
 def test_users_only_see_their_own_expenses(client):
     # register two separate users
     client.post("/auth/register", json={"email": "userA@test.com", "password": "pass123"})

@@ -2,12 +2,12 @@
 # all of these require login, and only ever touch the logged in user's
 # own expenses
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.database.db import get_db
-from app.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseOut
+from app.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseOut, ImportResult
 from app.services import expense_service
 from app.models.user import User
 from app.auth.dependencies import get_current_user
@@ -30,6 +30,20 @@ def export_expenses(db: Session = Depends(get_db), current_user: User = Depends(
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=expenses.csv"},
     )
+
+
+@router.post("/import", response_model=ImportResult)
+async def import_expenses(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Please upload a .csv file")
+
+    contents = await file.read()
+    csv_text = contents.decode("utf-8")
+    return expense_service.import_expenses_csv(db, csv_text, current_user.id)
 
 
 @router.post("", response_model=ExpenseOut, status_code=201)
