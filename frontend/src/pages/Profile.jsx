@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMe, changePassword, deleteAccount } from "../api/auth";
+import { getMe, changePassword, deleteAccount, exportAccountData } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -25,6 +25,8 @@ function Profile() {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [deleting, setDeleting] = useState(false);
+
+  const [backingUp, setBackingUp] = useState(false);
 
   useEffect(() => {
     getMe()
@@ -77,6 +79,28 @@ function Profile() {
     }
   }
 
+  async function handleBackup() {
+    setBackingUp(true);
+    try {
+      const data = await exportAccountData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "account_backup.json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      showToast("Backup downloaded", "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Could not create backup. Please try again.", "error");
+    } finally {
+      setBackingUp(false);
+    }
+  }
+
   if (loading) return <LoadingSpinner text="Loading profile..." />;
 
   return (
@@ -116,6 +140,17 @@ function Profile() {
             {savingPassword ? "Saving..." : "Update Password"}
           </button>
         </form>
+      </div>
+
+      <div className="card">
+        <h2 className="section-title">Backup Your Data</h2>
+        <p className="profile-field">
+          Download everything - your expenses, budget, and category budgets - as one
+          JSON file.
+        </p>
+        <button className="btn btn-secondary" onClick={handleBackup} disabled={backingUp}>
+          {backingUp ? "Preparing..." : "⬇ Download Backup"}
+        </button>
       </div>
 
       <div className="card danger-zone">

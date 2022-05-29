@@ -21,3 +21,7 @@ export function changePassword(currentPassword, newPassword) {
 export function deleteAccount(password) {
   return api.delete("/auth/me", { data: { password } });
 }
+
+export function exportAccountData() {
+  return api.get("/auth/export-data").then((res) => res.data);
+}
