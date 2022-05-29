@@ -115,6 +115,28 @@ def test_delete_account(client, auth_headers):
     assert login_res.status_code == 401
 
 
+def test_export_data(client, auth_headers):
+    client.post(
+        "/expenses",
+        json={"title": "Pizza", "amount": 250, "category": "Food", "date": "2026-09-01"},
+        headers=auth_headers,
+    )
+    client.put("/budget", json={"monthly_limit": 5000}, headers=auth_headers)
+
+    res = client.get("/auth/export-data", headers=auth_headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["account"]["email"] == "test@example.com"
+    assert data["budget"]["monthly_limit"] == 5000
+    assert len(data["expenses"]) == 1
+    assert data["expenses"][0]["title"] == "Pizza"
+
+
+def test_export_data_requires_auth(client):
+    res = client.get("/auth/export-data")
+    assert res.status_code == 401
+
+
 def test_delete_account_wrong_password_fails(client, auth_headers):
     res = client.request(
         "DELETE", "/auth/me", json={"password": "wrongpassword"}, headers=auth_headers

@@ -1,6 +1,7 @@
 # auth.py - register + login + account management endpoints
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.database.db import get_db
@@ -52,6 +53,17 @@ def update_password(
 
     auth_service.change_password(db, current_user, data.new_password)
     return {"message": "Password updated"}
+
+
+@router.get("/export-data")
+def export_my_data(
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
+    data = auth_service.export_account_data(db, current_user)
+    return JSONResponse(
+        content=data,
+        headers={"Content-Disposition": "attachment; filename=account_backup.json"},
+    )
 
 
 @router.delete("/me", status_code=204)

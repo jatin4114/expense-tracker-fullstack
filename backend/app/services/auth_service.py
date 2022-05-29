@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.models.expense import Expense
 from app.models.budget import Budget
+from app.models.category_budget import CategoryBudget
 from app.schemas.user import UserCreate
 from app.auth.security import hash_password, verify_password
 from app.logging_config import get_logger
@@ -53,3 +54,35 @@ def delete_account(db: Session, user: User):
     db.delete(user)
     db.commit()
     logger.info("Account deleted: user_id=%s", user.id)
+
+
+def export_account_data(db: Session, user: User) -> dict:
+    # everything that belongs to this user, as one json blob - lets
+    # them keep a full backup outside the app (unlike the csv export,
+    # which is just expenses)
+    expenses = db.query(Expense).filter(Expense.user_id == user.id).all()
+    budget = db.query(Budget).filter(Budget.user_id == user.id).first()
+    category_budgets = (
+        db.query(CategoryBudget).filter(CategoryBudget.user_id == user.id).all()
+    )
+
+    return {
+        "account": {"email": user.email, "created_at": user.created_at.isoformat()},
+        "budget": {"monthly_limit": budget.monthly_limit} if budget else None,
+        "category_budgets": [
+            {"category": b.category, "monthly_limit": b.monthly_limit}
+            for b in category_budgets
+        ],
+        "expenses": [
+            {
+                "title": e.title,
+                "amount": e.amount,
+                "category": e.category,
+                "date": e.date.isoformat(),
+                "description": e.description,
+                "payment_method": e.payment_method,
+                "created_at": e.created_at.isoformat(),
+            }
+            for e in expenses
+        ],
+    }
